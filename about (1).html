@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | Save2Serve</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase Script - Home page jaisa -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase initialization - Home page jaisa
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseMain = window.supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+  <!-- Cookie Management System -->
+<script src="cookie.js"></script>
+  <!-- Dropdown Colors CSS - Home page jaisa -->
+  <style>
+    /* 🔵 Dropdown Menu Colors - Home page jaisa */
+    .dropdown-menu a {
+      color: #333; /* Default text color */
+    }
+    
+    .dropdown-menu a:hover {
+      color: #1A5A9A; /* Blue on hover */
+      background: #f0f7ff;
+      padding-left: 20px;
+    }
+    
+    .dropdown-menu a[href="profile.html"] {
+      color: #1A5A9A; /* Profile link - Blue */
+    }
+    
+    .dropdown-menu a[href="settings.html"] {
+      color: #FF9000; /* Settings link - Orange */
+    }
+    
+    .dropdown-menu a.logout-btn {
+      color: #F44336 !important; /* Logout - Red */
+      font-weight: 600;
+    }
+    
+    .dropdown-menu a.logout-btn:hover {
+      background: #F44336 !important;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Home page jaisa Top Bar -->
+  <div class="top-bar" id="topBarContainer">
+    <!-- JavaScript se load hoga - Home page jaisa -->
+  </div>
+
+  <!-- 🔹 Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+        <div class="logo-text">
+          <h1>Save2Serve</h1>
+          <p>Because freshness deserves care</p>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="recipes.html" onclick="return checkLogin('recipes.html')">Recipes</a>
+        <a href="grocery.html" onclick="return checkLogin('grocery.html')">Grocery</a>
+        <a href="about.html" class="active">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 🔹 Page Hero -->
+  <section class="page-hero about-hero">
+    <div class="overlay"></div>
+    <div class="page-hero-content">
+      <h2>About Save2Serve</h2>
+      <p>Our mission to reduce food waste and help you make the most of your groceries</p>
+    </div>
+  </section>
+
+  <!-- 🔹 About Content -->
+  <section class="about-content">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <h3>Our Story</h3>
+          <p>Save2Serve was founded with a simple goal: to help households reduce food waste by making it easier to track groceries and find recipes to use ingredients before they expire.</p>
+          
+          <p>Every year, millions of tons of food are wasted globally, contributing to environmental problems and financial loss for families. We believe that with the right tools, we can all make a difference.</p>
+          
+          <h3>Our Mission</h3>
+          <p>We're committed to creating a world where no food goes to waste. Our platform helps you:</p>
+          <ul>
+            <li>Track expiration dates of your groceries</li>
+            <li>Receive personalized recipe suggestions</li>
+            <li>Save money by reducing food waste</li>
+            <li>Contribute to a more sustainable planet</li>
+          </ul>
+        </div>
+        
+        <div class="about-stats">
+          <h3>Food Waste Facts</h3>
+          <div class="stat-card">
+            <div class="stat-number">30%</div>
+            <div class="stat-desc">of all food produced globally is wasted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">$1,500</div>
+            <div class="stat-desc">average annual food waste cost per family</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Footer -->
+  <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <script>
+    // ✅ Initialize when page loads - Home page jaisa
+    document.addEventListener('DOMContentLoaded', async function() {
+      await setupTopBar(); // ✅ Home page jaisa top bar
+      
+      // ✅ Home page jaisa login check (but About page public rahega)
+      await checkAuthForAbout();
+    });
+
+    // ✅ Home page jaisa top bar setup
+    async function setupTopBar() {
+      const topBarContainer = document.getElementById('topBarContainer');
+      
+      // Check if user is logged in
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (session) {
+        // User is logged in - show profile with dropdown
+        const { data: { user } } = await supabaseMain.auth.getUser();
+        const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+        
+        topBarContainer.innerHTML = `
+          <div class="auth-links">
+            <div class="logged-in-user">
+              <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF9000&color=fff" 
+                     alt="User" class="user-avatar" id="topAvatar">
+                <span class="user-name">${userName}</span>
+                <div class="dropdown-menu">
+                  <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                  <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                  <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // ✅ Add logout functionality - Home page jaisa
+        document.querySelector('.logout-btn').addEventListener('click', async function(e) {
+          e.preventDefault();
+          await supabaseMain.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'index.html';
+        });
+        
+      } else {
+        // User is not logged in - show login/register links
+        topBarContainer.innerHTML = `
+          <div class="auth-links">
+            <div class="guest-user">
+              <a href="login.html">Login</a> | <a href="signup.html">Register</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ✅ About page ke liye auth check (public access allow karein)
+    async function checkAuthForAbout() {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        // Agar user logged in nahi hai, toh sirf message show karein
+        console.log("User not logged in, but About page is public");
+        // ✅ About page public hai, isliye redirect nahi karenge
+        return false;
+      }
+      
+      return true;
+    }
+
+    // ✅ Home page jaisa login check for navigation
+    async function checkLogin(redirectUrl = null) {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        // User not logged in
+        const userConfirmed = confirm("You need to login first. Go to login page?");
+        if (userConfirmed) {
+          window.location.href = 'login.html';
+        }
+        return false; // Prevent default navigation
+      }
+      
+      // User is logged in
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }
+      return true;
+    }
+
+    // ✅ Also update when auth state changes - Home page jaisa
+    supabaseMain.auth.onAuthStateChange((event, session) => {
+      setupTopBar();
+    });
+  </script>
+
+</body>
+</html>

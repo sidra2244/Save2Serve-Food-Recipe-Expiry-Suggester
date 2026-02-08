@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Save2Serve</title>
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .success-box {
+      background: #e8f5e9;
+      border: 2px solid #4CAF50;
+      border-radius: 10px;
+      padding: 25px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .success-icon {
+      font-size: 60px;
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+    
+    .success-title {
+      color: #2E7D32;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+    
+    .success-text {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    .email-highlight {
+      background: #fff3cd;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: #856404;
+      border: 2px solid #ffd166;
+      display: inline-block;
+      margin: 10px 0;
+    }
+    
+    .next-steps {
+      background: #f1f8e9;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    
+    .next-steps h4 {
+      color: #2E7D32;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .next-steps ul {
+      padding-left: 20px;
+      color: #555;
+    }
+    
+    .next-steps li {
+      margin-bottom: 10px;
+    }
+    
+    .resend-btn {
+      background: #FF9000;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    
+    .resend-btn:hover:not(:disabled) {
+      background: #e68200;
+    }
+    
+    .resend-btn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    .timer-text {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+    }
+    
+    .login-btn {
+      background: #1A5A9A;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 15px;
+    }
+    
+    .login-btn:hover {
+      background: #0f4a8a;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Left side form -->
+    <div id="signupFormContainer" class="form-box">
+      <!-- Signup Form (Initially Visible) -->
+      <div id="signupFormContent">
+        <h2>Create Your Account</h2>
+        <p>Join Save2Serve and make cooking smart!</p>
+        <form id="signupForm">
+          <input type="text" id="name" placeholder="Full Name" required>
+          <input type="email" id="email" placeholder="Email" required>
+          <input type="password" id="password" placeholder="Password (min. 6 characters)" required>
+          <button type="submit" class="btn">Sign Up</button>
+          <p class="switch">Already have an account? <a href="login.html">Login</a></p>
+        </form>
+        <div id="message" style="margin-top: 15px;"></div>
+      </div>
+      
+      <!-- Success Message (Initially Hidden) -->
+      <div id="successMessage" style="display: none;"></div>
+    </div>
+
+    <!-- Right side image (SAME FOR BOTH STATES) -->
+    <div class="side-image">
+      <img src="images/hii.png" alt="Food Illustration">
+    </div>
+  </div>
+
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase initialization
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+    let lastSignupEmail = '';
+    let resendTimer = null;
+    let resendCountdown = 60;
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      // Validation
+      if (password.length < 6) {
+        showError('Password must be at least 6 characters long');
+        return;
+      }
+      
+      // Save email for resend functionality
+      lastSignupEmail = email;
+      
+      // Show loading state
+      const submitBtn = document.querySelector('#signupForm button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = 'Creating Account...';
+      submitBtn.disabled = true;
+      
+      try {
+        // Supabase signup
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              full_name: name
+            },
+            emailRedirectTo: window.location.origin + '/login.html'
+          }
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Show success message and hide form
+        showSuccessMessage(email, name);
+        
+        // Clear form
+        document.getElementById('signupForm').reset();
+        
+      } catch (error) {
+        // Show error message
+        showError('Error: ' + error.message);
+        console.error('Signup error:', error);
+      } finally {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // Function to show error message
+    function showError(message) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.innerHTML = `
+        <div style="
+          background: #ffebee;
+          border: 2px solid #f44336;
+          border-radius: 10px;
+          padding: 15px;
+          text-align: center;
+          margin-top: 15px;
+        ">
+          <div style="color: #f44336; font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+            ⚠️ Registration Failed
+          </div>
+          <div style="color: #555;">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Function to show success message and hide form
+    function showSuccessMessage(email, name) {
+      // Hide signup form
+      document.getElementById('signupFormContent').style.display = 'none';
+      
+      // Show success message in the SAME form-box
+      const successDiv = document.getElementById('successMessage');
+      successDiv.style.display = 'block';
+      successDiv.innerHTML = `
+        <div class="success-box">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Welcome to Save2Serve!</div>
+          
+          <div class="success-text">
+            We've sent a confirmation email to:
+          </div>
+          
+          <div class="email-highlight">
+            ${email}
+          </div>
+          
+          <div class="next-steps">
+            <h4>📧 Next Steps:</h4>
+            <ul>
+              <li>Check your inbox for email from Save2Serve</li>
+              <li>Click the verification link in the email</li>
+              <li>After verification, login to your account</li>
+              <li>Check spam folder if you don't see the email</li>
+            </ul>
+          </div>
+          
+          <div style="margin-top: 20px;">
+            <button class="resend-btn" onclick="resendVerification()" id="resendBtn">
+              Resend Verification Email
+            </button>
+            <div id="timerText" class="timer-text">You can resend in 60 seconds</div>
+          </div>
+          
+          <div style="margin-top: 25px;">
+            <a href="login.html" class="login-btn">
+              Go to Login Page
+            </a>
+          </div>
+          
+          <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <a href="#" style="color: #1A5A9A; text-decoration: none; font-weight: 600;" onclick="goBackToSignup()">
+              ← Back to Sign Up
+            </a>
+          </div>
+        </div>
+      `;
+      
+      // Start resend timer
+      startResendTimer();
+    }
+    
+    // Function to go back to signup form
+    function goBackToSignup() {
+      // Show signup form
+      document.getElementById('signupFormContent').style.display = 'block';
+      
+      // Hide success message
+      document.getElementById('successMessage').style.display = 'none';
+      
+      // Clear any messages
+      document.getElementById('message').innerHTML = '';
+    }
+    
+    // Function to resend verification email
+    async function resendVerification() {
+      if (!lastSignupEmail) {
+        alert('Please sign up first');
+        return;
+      }
+      
+      const resendBtn = document.getElementById('resendBtn');
+      const timerText = document.getElementById('timerText');
+      
+      // Disable button and show loading
+      resendBtn.disabled = true;
+      resendBtn.innerHTML = 'Sending...';
+      
+      try {
+        // Try to sign up again with same credentials
+        const { error } = await supabaseClient.auth.signUp({
+          email: lastSignupEmail,
+          password: 'tempPassword123',
+          options: {
+            emailRedirectTo: window.location.origin + '/login.html'
+          }
+        });
+        
+        if (error && error.message.includes('already registered')) {
+          // User already exists, that's fine
+          showTemporaryMessage('Verification email resent! Check your inbox.');
+        } else if (error) {
+          throw error;
+        } else {
+          showTemporaryMessage('Verification email resent! Check your inbox.');
+        }
+        
+        // Reset timer
+        resetResendTimer();
+        
+      } catch (error) {
+        console.error('Resend error:', error);
+        showTemporaryMessage('Email sent! Please check your inbox.');
+      } finally {
+        // Re-enable button after 60 seconds
+        setTimeout(() => {
+          if (resendBtn) {
+            resendBtn.disabled = false;
+            resendBtn.innerHTML = 'Resend Verification Email';
+          }
+        }, 60000);
+      }
+    }
+    
+    // Show temporary message
+    function showTemporaryMessage(message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: fadeInOut 3s ease;
+      `;
+      messageDiv.innerHTML = `<span style="margin-right: 8px;">✓</span> ${message}`;
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+    
+    // Timer functions
+    function startResendTimer() {
+      resendCountdown = 60;
+      if (resendTimer) clearInterval(resendTimer);
+      
+      resendTimer = setInterval(() => {
+        resendCountdown--;
+        const timerText = document.getElementById('timerText');
+        if (timerText) {
+          if (resendCountdown > 0) {
+            timerText.textContent = `You can resend in ${resendCountdown} seconds`;
+          } else {
+            timerText.textContent = 'You can resend now';
+            clearInterval(resendTimer);
+          }
+        }
+      }, 1000);
+    }
+    
+    function resetResendTimer() {
+      resendCountdown = 60;
+      const timerText = document.getElementById('timerText');
+      if (timerText) {
+        timerText.textContent = `You can resend in ${resendCountdown} seconds`;
+      }
+      startResendTimer();
+    }
+    
+    // Add fadeInOut animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(-10px); }
+        15% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

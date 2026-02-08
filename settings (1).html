@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings | Save2Serve</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1A5A9A 0%, #0d3a6d 100%);
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+    }
+
+    .logo-text h1 {
+      color: #1A5A9A;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: #777;
+      font-style: italic;
+    }
+
+    /* Back Button */
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FF9000;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(255, 144, 0, 0.3);
+    }
+
+    .back-button:hover {
+      background: #e68200;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 144, 0, 0.4);
+    }
+
+    .back-button i {
+      font-size: 16px;
+    }
+
+    /* Settings Section */
+    .settings-section {
+      padding: 40px 20px;
+    }
+
+    .settings-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .settings-header h2 {
+      font-size: 32px;
+      color: white;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .settings-header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .settings-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .settings-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #FF9000, #FFD54F);
+    }
+
+    .settings-card h3 {
+      color: #1A5A9A;
+      margin-bottom: 20px;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-card h3 i {
+      color: #FF9000;
+    }
+
+    /* Option Buttons */
+    .option-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .option-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border: 2px solid #e1e1e1;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .option-btn:hover {
+      border-color: #1A5A9A;
+      background: #f0f7ff;
+      transform: translateX(5px);
+    }
+
+    .option-btn-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .option-btn i {
+      color: #1A5A9A;
+      font-size: 18px;
+    }
+
+    .option-btn-text h4 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .option-btn-text p {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .option-btn-arrow {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* Form Styles */
+    .form-container {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #1A5A9A;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e1e1e1;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #1A5A9A;
+      box-shadow: 0 0 0 3px rgba(26, 90, 154, 0.1);
+    }
+
+    .form-group input[readonly] {
+      background: #f0f0f0;
+      color: #777;
+      cursor: not-allowed;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      background: #1A5A9A;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 15px;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #0f4a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 90, 154, 0.3);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 15px;
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    /* Cookie Settings Specific Styles */
+    .cookie-buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .cookie-btn {
+      padding: 12px 25px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 160px;
+    }
+
+    .cookie-btn.accept {
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      color: white;
+    }
+
+    .cookie-btn.necessary {
+      background: linear-gradient(135deg, #FF9000, #FFB347);
+      color: white;
+    }
+
+    .cookie-btn.reject {
+      background: #f0f0f0;
+      color: #666;
+      border: 2px solid #ddd;
+    }
+
+    .cookie-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .cookie-status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .status-all {
+      background: #e8f5e8;
+      color: #2E7D32;
+    }
+
+    .status-necessary {
+      background: #fff3e0;
+      color: #EF6C00;
+    }
+
+    .status-reject {
+      background: #ffebee;
+      color: #C62828;
+    }
+
+    .status-not-set {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    /* Cookie Info Card */
+    .cookie-info-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      border-left: 4px solid #1A5A9A;
+    }
+
+    .cookie-info-card h4 {
+      color: #555;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .cookie-info-card p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Cookie Types Grid */
+    .cookie-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .cookie-type-card {
+      background: #f0f7ff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #d1e3ff;
+    }
+
+    .cookie-type-card h5 {
+      color: #1A5A9A;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .cookie-type-card p {
+      color: #666;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Toast Notification */
+    .cookie-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(120%);
+      transition: transform 0.3s ease;
+      max-width: 350px;
+      border-left: 4px solid #4CAF50;
+    }
+
+    .cookie-toast.show {
+      transform: translateX(0);
+    }
+
+    .cookie-toast-success {
+      border-left-color: #4CAF50;
+    }
+
+    .cookie-toast-info {
+      border-left-color: #2196F3;
+    }
+
+    .cookie-toast i {
+      font-size: 20px;
+    }
+
+    .cookie-toast-success i {
+      color: #4CAF50;
+    }
+
+    .cookie-toast-info i {
+      color: #2196F3;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: 40px;
+      backdrop-filter: blur(10px);
+    }
+
+    footer i {
+      color: #FF9000;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .logo-section {
+        justify-content: center;
+      }
+      
+      .settings-section {
+        padding: 30px 15px;
+      }
+      
+      .settings-card {
+        padding: 20px 15px;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      .btn-primary, .btn-secondary {
+        width: 100%;
+      }
+      
+      .cookie-buttons {
+        flex-direction: column;
+      }
+      
+      .cookie-btn {
+        width: 100%;
+        min-width: auto;
+      }
+      
+      .cookie-types {
+        grid-template-columns: 1fr;
+      }
+      
+      .back-button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .settings-header h2 {
+        font-size: 28px;
+      }
+      
+      .settings-card h3 {
+        font-size: 20px;
+      }
+      
+      .option-btn {
+        padding: 12px 15px;
+      }
+      
+      .form-group input {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Header -->
+  <header>
+    <div class="logo-section">
+      <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+      <div class="logo-text">
+        <h1>Save2Serve</h1>
+        <p>Because freshness deserves care</p>
+      </div>
+    </div>
+    
+    <!-- Back Button -->
+    <a href="profile.html" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Back to Profile
+    </a>
+  </header>
+
+  <!-- 🔹 Settings Section -->
+  <section class="settings-section">
+    <div class="container">
+      <div class="settings-header">
+        <h2>Account Settings</h2>
+        <p>Manage your account and privacy settings</p>
+      </div>
+
+      <div class="settings-grid">
+        
+        <!-- Account Settings -->
+        <div class="settings-card">
+          <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
+          <div class="option-buttons">
+            
+            <!-- Change Email Option -->
+            <div class="option-btn" onclick="toggleForm('emailForm')">
+              <div class="option-btn-content">
+                <i class="fas fa-envelope"></i>
+                <div class="option-btn-text">
+                  <h4>Change Email</h4>
+                  <p>Update your email address</p>
+                </div>
+              </div>
+              <span class="option-btn-arrow">›</span>
+            </div>
+
+            <!-- Email Form -->
+            <div class="form-container" id="emailForm">
+              <div class="success-message" id="emailSuccess">
+                Email updated successfully!
+              </div>
+              <div class="form-group">
+                <label>Current Email</label>
+                <input type="email" id="currentEmail" readonly>
+              </div>
+              <div class="form-group">
+                <label>New Email</label>
+                <input type="email" id="newEmail" placeholder="Enter new email">
+              </div>
+              <div class="form-group">
+                <label>Confirm New Email</label>
+                <input type="email" id="confirmEmail" placeholder="Confirm new email">
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" onclick="updateEmail()">Update Email</button>
+                <button class="btn-secondary" onclick="toggleForm('emailForm')">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Change Password Option -->
+            <div class="option-btn" onclick="toggleForm('passwordForm')">
+              <div class="option-btn-content">
+                <i class="fas fa-lock"></i>
+                <div class="option-btn-text">
+                  <h4>Change Password</h4>
+                  <p>Set a new password for your account</p>
+                </div>
+              </div>
+              <span class="option-btn-arrow">›</span>
+            </div>
+
+            <!-- Password Form -->
+            <div class="form-container" id="passwordForm">
+              <div class="success-message" id="passwordSuccess">
+                Password updated successfully!
+              </div>
+              <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+              </div>
+              <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" onclick="updatePassword()">Update Password</button>
+                <button class="btn-secondary" onclick="toggleForm('passwordForm')">Cancel</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 🔹 COOKIE SETTINGS SECTION -->
+        <div class="settings-card">
+          <h3><i class="fas fa-cookie-bite"></i> Privacy Settings</h3>
+          
+          <div class="cookie-info-card">
+            <h4>Current Cookie Status 
+              <span id="currentCookieStatusBadge" class="cookie-status-badge status-not-set">
+                Loading...
+              </span>
+            </h4>
+            <p id="currentCookieDescription">Manage your cookie preferences to control how we use your data.</p>
+          </div>
+
+          <h4 style="color: #555; margin-bottom: 15px;">Manage Your Preferences</h4>
+          
+          <div class="cookie-buttons">
+            <button onclick="updateCookieSetting('all')" class="cookie-btn accept">
+              <i class="fas fa-check-circle"></i> Accept All Cookies
+            </button>
+            <button onclick="updateCookieSetting('necessary')" class="cookie-btn necessary">
+              <i class="fas fa-cog"></i> Necessary Only
+            </button>
+            <button onclick="clearAllCookies()" class="cookie-btn reject">
+              <i class="fas fa-trash-alt"></i> Clear All Cookies
+            </button>
+          </div>
+
+          <div style="margin-top: 25px;">
+            <h4 style="color: #555; margin-bottom: 15px;">Cookie Types</h4>
+            <div class="cookie-types">
+              <div class="cookie-type-card">
+                <h5><i class="fas fa-shield-alt" style="color: #4CAF50;"></i> Essential</h5>
+                <p>Required for basic site functionality like login and security</p>
+              </div>
+              <div class="cookie-type-card">
+                <h5><i class="fas fa-user-cog" style="color: #FF9000;"></i> Preferences</h5>
+                <p>Remember your settings and preferences for better experience</p>
+              </div>
+              <div class="cookie-type-card">
+                <h5><i class="fas fa-chart-bar" style="color: #2196F3;"></i> Analytics</h5>
+                <p>Help us understand how you use the site to improve it</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Footer -->
+  <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // FIXED: Proper Supabase initialization with headers
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseSettings = window.supabase.createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      },
+      global: {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    });
+
+    let currentUser = null;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', async function() {
+      await checkAuth();
+      loadCookieSettings();
+    });
+
+    // Check authentication
+    async function checkAuth() {
+      try {
+        const { data: { session }, error } = await supabaseSettings.auth.getSession();
+        
+        if (error) {
+          console.error('Session error:', error);
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        if (!session) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const { data: { user } } = await supabaseSettings.auth.getUser();
+        currentUser = user;
+        
+        if (user) {
+          document.getElementById('currentEmail').value = user.email || '';
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = 'login.html';
+      }
+    }
+
+    // ==================== COOKIE SETTINGS FUNCTIONS ====================
+    
+    function loadCookieSettings() {
+      let consent = null;
+      
+      // Check localStorage first
+      consent = localStorage.getItem('cookieChoice');
+      
+      // If not in localStorage, check cookies
+      if (!consent) {
+        const match = document.cookie.match(/(^| )cookie_consent=([^;]+)/);
+        consent = match ? match[2] : null;
+      }
+      
+      updateCookieDisplay(consent);
+    }
+    
+    function updateCookieDisplay(consent) {
+      const badge = document.getElementById('currentCookieStatusBadge');
+      const description = document.getElementById('currentCookieDescription');
+      
+      let statusText = 'Not Set';
+      let statusClass = 'status-not-set';
+      let descText = 'You have not set your cookie preferences yet.';
+      
+      switch(consent) {
+        case 'all':
+          statusText = 'All Accepted';
+          statusClass = 'status-all';
+          descText = 'You have accepted all cookies: essential, preferences, and analytics.';
+          break;
+        case 'necessary':
+          statusText = 'Necessary Only';
+          statusClass = 'status-necessary';
+          descText = 'Only essential cookies for website functionality are enabled.';
+          break;
+        case 'reject':
+          statusText = 'Rejected';
+          statusClass = 'status-reject';
+          descText = 'You have rejected non-essential cookies. Only essential cookies are enabled.';
+          break;
+      }
+      
+      badge.textContent = statusText;
+      badge.className = `cookie-status-badge ${statusClass}`;
+      description.textContent = descText;
+    }
+    
+    function updateCookieSetting(level) {
+      // Save to localStorage
+      localStorage.setItem('cookieChoice', level);
+      
+      // Save to cookie with 1 year expiry
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + 1);
+      document.cookie = `cookie_consent=${level}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+      
+      updateCookieDisplay(level);
+      
+      showCookieToast(`Cookie preferences updated to: ${level}`, 'success');
+      
+      console.log(`Cookie setting updated to: ${level}`);
+    }
+    
+    function clearAllCookies() {
+      if (confirm('Are you sure you want to clear all cookies? This will reset your preferences and may log you out.')) {
+        // Clear localStorage
+        localStorage.removeItem('cookieChoice');
+        localStorage.removeItem('userSettings');
+        
+        // Clear cookies
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i];
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        }
+        
+        updateCookieDisplay(null);
+        
+        showCookieToast('All cookies have been cleared.', 'info');
+        
+        // Reload page after 1 second
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    }
+    
+    function showCookieToast(message, type = 'info') {
+      const existingToast = document.querySelector('.cookie-toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      const toast = document.createElement('div');
+      toast.className = `cookie-toast cookie-toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.remove();
+          }
+        }, 300);
+      }, 3000);
+    }
+    
+    // ==================== EXISTING SETTINGS FUNCTIONS ====================
+    
+    function toggleForm(formId) {
+      const form = document.getElementById(formId);
+      const allForms = document.querySelectorAll('.form-container');
+      
+      allForms.forEach(f => {
+        if (f.id !== formId) {
+          f.style.display = 'none';
+        }
+      });
+      
+      if (form.style.display === 'block') {
+        form.style.display = 'none';
+      } else {
+        form.style.display = 'block';
+        if (document.getElementById('emailSuccess')) {
+          document.getElementById('emailSuccess').style.display = 'none';
+        }
+        if (document.getElementById('passwordSuccess')) {
+          document.getElementById('passwordSuccess').style.display = 'none';
+        }
+      }
+    }
+
+    async function updateEmail() {
+      const newEmail = document.getElementById('newEmail').value.trim();
+      const confirmEmail = document.getElementById('confirmEmail').value.trim();
+      
+      if (!newEmail || !confirmEmail) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      if (newEmail !== confirmEmail) {
+        alert('Emails do not match');
+        return;
+      }
+      
+      if (newEmail === currentUser.email) {
+        alert('New email is same as current email');
+        return;
+      }
+      
+      try {
+        const { error } = await supabaseSettings.auth.updateUser({
+          email: newEmail
+        });
+        
+        if (error) throw error;
+        
+        document.getElementById('emailSuccess').style.display = 'block';
+        document.getElementById('currentEmail').value = newEmail;
+        document.getElementById('newEmail').value = '';
+        document.getElementById('confirmEmail').value = '';
+        
+        setTimeout(() => {
+          document.getElementById('emailForm').style.display = 'none';
+          document.getElementById('emailSuccess').style.display = 'none';
+        }, 2000);
+        
+      } catch (error) {
+        alert('Error updating email: ' + error.message);
+      }
+    }
+
+    async function updatePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+      }
+      
+      try {
+        const { error: signInError } = await supabaseSettings.auth.signInWithPassword({
+          email: currentUser.email,
+          password: currentPassword
+        });
+        
+        if (signInError) {
+          alert('Current password is incorrect');
+          return;
+        }
+        
+        const { error } = await supabaseSettings.auth.updateUser({
+          password: newPassword
+        });
+        
+        if (error) throw error;
+        
+        document.getElementById('passwordSuccess').style.display = 'block';
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        setTimeout(() => {
+          document.getElementById('passwordForm').style.display = 'none';
+          document.getElementById('passwordSuccess').style.display = 'none';
+        }, 2000);
+        
+      } catch (error) {
+        alert('Error updating password: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>

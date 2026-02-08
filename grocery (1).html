@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grocery Tracker | Save2Serve</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <!-- Chart.js for Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Cookie Management System -->
+<script src="cookie.js"></script>
+  <style>
+    /* 🔵 Dropdown Menu Colors - Home page jaisa */
+    .dropdown-menu a {
+      color: #333;
+    }
+    
+    .dropdown-menu a:hover {
+      color: #1A5A9A;
+      background: #f0f7ff;
+      padding-left: 20px;
+    }
+    
+    /* Progress Button Style - FIXED POSITION */
+    .progress-container {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      border: 2px solid #e1e1e1;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .progress-btn {
+      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.3);
+      min-width: 250px;
+      justify-content: center;
+    }
+    
+    .progress-btn:hover {
+      background: linear-gradient(135deg, #3d8b40 0%, #1B5E20 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    }
+    
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .modal-close:hover {
+      color: #F44336;
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #1A5A9A;
+      padding-bottom: 15px;
+    }
+    
+    .modal-header h2 {
+      color: #1A5A9A;
+      margin-bottom: 5px;
+    }
+    
+    .modal-header p {
+      color: #666;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #e1e1e1;
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .used-stat .stat-value {
+      color: #4CAF50;
+    }
+    
+    .wasted-stat .stat-value {
+      color: #F44336;
+    }
+    
+    .total-stat .stat-value {
+      color: #1A5A9A;
+    }
+    
+    .saved-stat .stat-value {
+      color: #FF9000;
+    }
+    
+    /* Chart Container */
+    .chart-container {
+      margin: 25px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e1e1e1;
+    }
+    
+    /* Item Lists in Modal */
+    .item-lists {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 25px;
+    }
+    
+    .item-list {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .item-list h4 {
+      color: #1A5A9A;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .item-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .item-list li {
+      padding: 8px 10px;
+      margin-bottom: 5px;
+      background: white;
+      border-radius: 5px;
+      border-left: 4px solid #4CAF50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .item-list li.wasted {
+      border-left-color: #F44336;
+    }
+    
+    .item-date {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    /* Item Status Styling */
+    .item-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+    
+    .status-used {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+    
+    .status-wasted {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+    
+    /* Used Items Section Styling - At bottom */
+    .used-items-separator {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px dashed #ddd;
+    }
+    
+    .used-items-separator h3 {
+      color: #4CAF50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .item-lists {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .progress-btn {
+        min-width: 200px;
+        padding: 12px 25px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal-content {
+        padding: 20px 15px;
+      }
+      
+      .progress-btn {
+        min-width: 180px;
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar" id="topBarContainer">
+    <!-- ✅ Home page jaisa top bar yahan aayega -->
+  </div>
+
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+        <div class="logo-text">
+          <h1>Save2Serve</h1>
+          <p>Because freshness deserves care</p>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="grocery.html" class="active">Grocery</a>
+        <a href="about.html" onclick="return checkLogin('about.html')">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="page-hero grocery-hero">
+    <div class="overlay"></div>
+    <div class="page-hero-content">
+      <h2>My Grocery List</h2>
+      <p>Track your groceries and their expiry dates</p>
+    </div>
+  </section>
+
+  <section class="grocery-management">
+    <div class="container">
+      <div class="add-item-section">
+        <h3>Add New Item</h3>
+        <div class="add-item-form">
+          <input type="text" id="itemName" placeholder="Item name">
+          <input type="date" id="itemExpiry">
+          <select id="itemCategory">
+            <option value="">Category</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="fruits">Fruits</option>
+            <option value="dairy">Dairy</option>
+            <option value="meat">Meat</option>
+            <option value="grains">Grains</option>
+            <option value="other">Other</option>
+          </select>
+          <button class="btn-primary" id="addItemBtn">Add Item</button>
+        </div>
+      </div>
+
+      <!-- 🔵 FIXED Progress Button - Add Item ke neeche center mein -->
+      <div class="progress-container">
+        <button class="progress-btn" id="viewProgressBtn">
+          <i class="fas fa-chart-line"></i> View My Progress
+        </button>
+        <p style="margin-top: 10px; color: #666; font-size: 14px;">
+          Track your food usage and waste reduction
+        </p>
+      </div>
+
+      <div class="grocery-sections">
+        <div class="grocery-section">
+          <h3>Expiring Soon <span class="badge" id="expiringCount">0</span></h3>
+          <div class="grocery-items" id="expiringSoon"></div>
+        </div>
+
+        <div class="grocery-section">
+          <h3>All Items</h3>
+          <div class="grocery-items" id="allItems"></div>
+          <!-- 🔵 Used items will be shown separately here -->
+          <div id="usedItemsContainer" style="display: none;">
+            <div class="used-items-separator">
+              <h3><i class="fas fa-check-circle"></i> Used Items</h3>
+              <div class="grocery-items" id="usedItems"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔵 Progress Modal -->
+  <div class="modal" id="progressModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal">&times;</button>
+      
+      <div class="modal-header">
+        <h2><i class="fas fa-chart-pie"></i> Your Grocery Progress</h2>
+        <p>Track how much food you've used vs wasted</p>
+      </div>
+      
+      <!-- Statistics Cards -->
+      <div class="stats-grid" id="statsGrid">
+        <!-- Stats will be loaded here -->
+      </div>
+      
+      <!-- Chart Container -->
+      <div class="chart-container">
+        <canvas id="progressChart"></canvas>
+      </div>
+      
+      <!-- Item Lists -->
+      <div class="item-lists" id="itemLists">
+        <!-- Used and Wasted items will be shown here -->
+      </div>
+      
+      <!-- Tips Section -->
+      <div class="tips-section" style="margin-top: 25px; padding: 15px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #4CAF50;">
+        <h4 style="color: #2e7d32; margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> Tips to Reduce Waste</h4>
+        <ul style="color: #555; padding-left: 20px;">
+          <li>Plan meals before shopping</li>
+          <li>Store items properly to extend freshness</li>
+          <li>Check expiry dates regularly</li>
+          <li>Use leftovers creatively</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+ <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <script>
+    console.log("=== GROCERY PAGE STARTING ===");
+    
+    // ✅ Supabase initialization
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseMain = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+    // Chart variable
+    let progressChart = null;
+    
+    // ✅ Initialize when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+      await checkAuth();
+      await setupGroceryPage();
+      setupProgressModal();
+    });
+
+    // ✅ Home page jaisa login check
+    async function checkAuth() {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        const userConfirmed = confirm("You need to login first. Go to login page?");
+        if (userConfirmed) {
+          window.location.href = 'login.html';
+        }
+        return false;
+      }
+      return true;
+    }
+
+    // ✅ Home page jaisa top bar setup
+    async function setupTopBar() {
+      const topBarContainer = document.getElementById('topBarContainer');
+      
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (session) {
+        const { data: { user } } = await supabaseMain.auth.getUser();
+        const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+        
+        topBarContainer.innerHTML = `
+          <div class="auth-links">
+            <div class="logged-in-user">
+              <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF9000&color=fff" 
+                     alt="User" class="user-avatar" id="topAvatar">
+                <span class="user-name">${userName}</span>
+                <div class="dropdown-menu">
+                  <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                  <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                  <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.querySelector('.logout-btn').addEventListener('click', async function(e) {
+          e.preventDefault();
+          await supabaseMain.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'index.html';
+        });
+        
+      } else {
+        topBarContainer.innerHTML = `
+          <div class="auth-links">
+            <div class="guest-user">
+              <a href="login.html">Login</a> | <a href="signup.html">Register</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ✅ Setup grocery page functionality
+    async function setupGroceryPage() {
+      try {
+        const { data: { session }, error } = await supabaseMain.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          alert("Authentication error");
+          return;
+        }
+        
+        if (!session) {
+          console.log("No Supabase session");
+          alert("Please login first");
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        console.log("User:", session.user.email);
+        
+        const userId = session.user.id;
+        console.log("User ID:", userId);
+        
+        setupTopBar();
+        await loadItems(userId);
+        setupForm(userId);
+        
+      } catch (error) {
+        console.error("Setup error:", error);
+      }
+    }
+    
+    // ✅ Load items from Supabase
+    async function loadItems(userId) {
+      console.log("Loading items for user:", userId);
+      
+      try {
+        const { data: items, error } = await supabaseMain
+          .from('grocery_items')
+          .select('*')
+          .eq('user_id', userId)
+          .order('expiry_date', { ascending: true });
+        
+        if (error) {
+          console.error("Load error:", error);
+          alert("Error loading items: " + error.message);
+          return;
+        }
+        
+        console.log("Items loaded:", items?.length || 0);
+        showItems(items || []);
+        
+      } catch (error) {
+        console.error("Load catch:", error);
+      }
+    }
+    
+    // ✅ Show items in UI - USED ITEMS SEPARATELY AT BOTTOM
+    function showItems(items) {
+      const allContainer = document.getElementById('allItems');
+      const expiringContainer = document.getElementById('expiringSoon');
+      const expiringCount = document.getElementById('expiringCount');
+      const usedItemsContainer = document.getElementById('usedItems');
+      const usedItemsSection = document.getElementById('usedItemsContainer');
+      
+      // Clear all containers
+      allContainer.innerHTML = '';
+      expiringContainer.innerHTML = '';
+      usedItemsContainer.innerHTML = '';
+      
+      if (items.length === 0) {
+        allContainer.innerHTML = '<p class="no-items">No grocery items added yet. Add your first item above!</p>';
+        expiringContainer.innerHTML = '<p class="no-items">No items expiring in the next 4 days.</p>';
+        expiringCount.textContent = '0';
+        usedItemsSection.style.display = 'none';
+        return;
+      }
+      
+      // Separate items into categories
+      const today = new Date();
+      let expiring = 0;
+      const activeItems = [];
+      const usedItemsList = [];
+      
+      items.forEach(item => {
+        const expiry = new Date(item.expiry_date);
+        const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+        
+        if (item.used === true) {
+          // 🔵 USED ITEMS - Add to separate list
+          usedItemsList.push({ item, daysLeft, expiry });
+        } else {
+          // 🔵 ACTIVE ITEMS (not used yet)
+          activeItems.push({ item, daysLeft, expiry });
+          
+          // 🔵 Check if it's expiring soon (but NOT used)
+          if (daysLeft <= 4) {
+            expiring++;
+          }
+        }
+      });
+      
+      // 🔵 Show ACTIVE items in "All Items" section
+      if (activeItems.length > 0) {
+        activeItems.forEach(({ item, daysLeft, expiry }) => {
+          const div = createItemElement(item, daysLeft, expiry);
+          allContainer.appendChild(div);
+        });
+      } else {
+        allContainer.innerHTML = '<p class="no-items">No active items. All items have been used!</p>';
+      }
+      
+      // 🔵 Show EXPIRING SOON items (only NOT used items)
+      if (expiring > 0) {
+        activeItems.forEach(({ item, daysLeft, expiry }) => {
+          if (daysLeft <= 4) {
+            const div = createItemElement(item, daysLeft, expiry);
+            expiringContainer.appendChild(div);
+          }
+        });
+      } else {
+        expiringContainer.innerHTML = '<p class="no-items">No items expiring in the next 4 days.</p>';
+      }
+      
+      expiringCount.textContent = expiring;
+      
+      // 🔵 Show USED ITEMS separately at bottom
+      if (usedItemsList.length > 0) {
+        usedItemsSection.style.display = 'block';
+        
+        usedItemsList.forEach(({ item, daysLeft, expiry }) => {
+          const div = createItemElement(item, daysLeft, expiry, true);
+          usedItemsContainer.appendChild(div);
+        });
+      } else {
+        usedItemsSection.style.display = 'none';
+      }
+    }
+    
+    // ✅ Create item element
+    function createItemElement(item, daysLeft, expiry, isUsed = false) {
+      const div = document.createElement('div');
+      div.className = 'grocery-item';
+      
+      if (!isUsed && daysLeft <= 4) {
+        div.classList.add('urgent');
+      }
+      
+      // 🔵 Status badge
+      const statusBadge = isUsed ? 
+        '<span class="item-status status-used"><i class="fas fa-check"></i> Used</span>' : 
+        (daysLeft < 0 ? '<span class="item-status status-wasted"><i class="fas fa-times"></i> Wasted</span>' : '');
+      
+      // 🔵 Days text
+      let daysText;
+      if (daysLeft < 0) {
+        daysText = `Expired ${Math.abs(daysLeft)} day${Math.abs(daysLeft) > 1 ? 's' : ''} ago`;
+      } else if (daysLeft === 0) {
+        daysText = 'Expires today';
+      } else {
+        daysText = `Expires in ${daysLeft} day${daysLeft > 1 ? 's' : ''}`;
+      }
+      
+      // 🔵 "Mark as Used" button (only for active items)
+      const markUsedBtn = !isUsed ? 
+        `<button class="btn-used" onclick="markAsUsed('${item.id}')" title="Mark as Used">
+          <i class="fas fa-check"></i> Used
+        </button>` : '';
+      
+      div.innerHTML = `
+        <div class="item-info">
+          <h4>${item.name} ${statusBadge}</h4>
+          <p class="category">${item.category || 'Uncategorized'}</p>
+          <p class="expiry">${daysText}</p>
+          <small>${expiry.toDateString()}</small>
+        </div>
+        <div class="item-actions">
+          <a href="recipes.html?ingredient=${encodeURIComponent(item.name.toLowerCase())}" class="btn-recipe">
+            Find Recipes
+          </a>
+          ${markUsedBtn}
+          <button class="btn-remove" onclick="deleteItem('${item.id}')">
+            Remove
+          </button>
+        </div>
+      `;
+      
+      return div;
+    }
+    
+    // ✅ Setup form for adding items
+    function setupForm(userId) {
+      const addBtn = document.getElementById('addItemBtn');
+      const nameInput = document.getElementById('itemName');
+      const expiryInput = document.getElementById('itemExpiry');
+      const categoryInput = document.getElementById('itemCategory');
+      
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      expiryInput.valueAsDate = tomorrow;
+      
+      addBtn.addEventListener('click', async function() {
+        const name = nameInput.value.trim();
+        const expiry = expiryInput.value;
+        const category = categoryInput.value || 'other';
+        
+        if (!name || !expiry) {
+          alert('Please fill item name and expiry date');
+          return;
+        }
+        
+        console.log("Adding item:", { name, expiry, category });
+        
+        try {
+          const newItem = {
+            user_id: userId,
+            name: name,
+            expiry_date: expiry,
+            category: category,
+            created_at: new Date().toISOString(),
+            used: false
+          };
+          
+          const { error } = await supabaseMain
+            .from('grocery_items')
+            .insert([newItem]);
+          
+          if (error) throw error;
+          
+          alert('✅ Item added successfully!');
+          nameInput.value = '';
+          categoryInput.value = '';
+          expiryInput.valueAsDate = tomorrow;
+          
+          await loadItems(userId);
+          
+        } catch (error) {
+          console.error("Add error:", error);
+          alert('❌ Error adding item: ' + error.message);
+        }
+      });
+    }
+    
+    // ✅ Delete item function
+    async function deleteItem(itemId) {
+      if (!confirm('Are you sure you want to delete this item?')) return;
+      
+      try {
+        const { error } = await supabaseMain
+          .from('grocery_items')
+          .delete()
+          .eq('id', itemId);
+        
+        if (error) throw error;
+        
+        alert('✅ Item deleted');
+        
+        const { data: { session } } = await supabaseMain.auth.getSession();
+        if (session) {
+          await loadItems(session.user.id);
+        }
+        
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert('Delete failed: ' + error.message);
+      }
+    }
+    
+    // ✅ Mark item as used
+    async function markAsUsed(itemId) {
+      try {
+        const { error } = await supabaseMain
+          .from('grocery_items')
+          .update({ used: true })
+          .eq('id', itemId);
+        
+        if (error) throw error;
+        
+        alert('✅ Item marked as used!');
+        
+        const { data: { session } } = await supabaseMain.auth.getSession();
+        if (session) {
+          await loadItems(session.user.id);
+        }
+        
+      } catch (error) {
+        console.error("Mark as used error:", error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // ✅ Setup Progress Modal
+    function setupProgressModal() {
+      const viewProgressBtn = document.getElementById('viewProgressBtn');
+      const progressModal = document.getElementById('progressModal');
+      const closeModalBtn = document.getElementById('closeModal');
+      
+      viewProgressBtn.addEventListener('click', async function() {
+        await loadProgressData();
+        progressModal.style.display = 'flex';
+      });
+      
+      closeModalBtn.addEventListener('click', function() {
+        progressModal.style.display = 'none';
+      });
+      
+      progressModal.addEventListener('click', function(e) {
+        if (e.target === progressModal) {
+          progressModal.style.display = 'none';
+        }
+      });
+    }
+    
+    // ✅ Load Progress Data
+    async function loadProgressData() {
+      try {
+        const { data: { session } } = await supabaseMain.auth.getSession();
+        if (!session) return;
+        
+        const userId = session.user.id;
+        
+        // Load all items
+        const { data: items, error } = await supabaseMain
+          .from('grocery_items')
+          .select('*')
+          .eq('user_id', userId);
+        
+        if (error) throw error;
+        
+        // Calculate statistics
+        const totalItems = items.length;
+        const usedItems = items.filter(item => item.used === true).length;
+        
+        // Calculate wasted items (expired and not used)
+        const today = new Date();
+        const wastedItems = items.filter(item => {
+          const expiry = new Date(item.expiry_date);
+          const isExpired = expiry < today;
+          return isExpired && !item.used;
+        }).length;
+        
+        const savedItems = usedItems - wastedItems;
+        
+        // Update stats cards
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card total-stat">
+            <div class="stat-value">${totalItems}</div>
+            <div class="stat-label">Total Items</div>
+          </div>
+          
+          <div class="stat-card used-stat">
+            <div class="stat-value">${usedItems}</div>
+            <div class="stat-label">Items Used</div>
+          </div>
+          
+          <div class="stat-card wasted-stat">
+            <div class="stat-value">${wastedItems}</div>
+            <div class="stat-label">Items Wasted</div>
+          </div>
+          
+          <div class="stat-card saved-stat">
+            <div class="stat-value">${savedItems > 0 ? savedItems : 0}</div>
+            <div class="stat-label">Items Saved</div>
+          </div>
+        `;
+        
+        // Create chart
+        createChart(usedItems, wastedItems, totalItems - (usedItems + wastedItems));
+        
+        // Show item lists
+        const usedItemsList = items.filter(item => item.used === true);
+        const wastedItemsList = items.filter(item => {
+          const expiry = new Date(item.expiry_date);
+          const isExpired = expiry < today;
+          return isExpired && !item.used;
+        });
+        
+        document.getElementById('itemLists').innerHTML = `
+          <div class="item-list">
+            <h4><i class="fas fa-check-circle" style="color:#4CAF50"></i> Used Items (${usedItemsList.length})</h4>
+            <ul>
+              ${usedItemsList.slice(0, 10).map(item => `
+                <li>
+                  <span>${item.name}</span>
+                  <span class="item-date">${new Date(item.expiry_date).toLocaleDateString()}</span>
+                </li>
+              `).join('')}
+              ${usedItemsList.length > 10 ? `<li style="text-align:center; color:#666; font-style:italic;">+ ${usedItemsList.length - 10} more items</li>` : ''}
+            </ul>
+          </div>
+          
+          <div class="item-list">
+            <h4><i class="fas fa-times-circle" style="color:#F44336"></i> Wasted Items (${wastedItemsList.length})</h4>
+            <ul>
+              ${wastedItemsList.slice(0, 10).map(item => `
+                <li class="wasted">
+                  <span>${item.name}</span>
+                  <span class="item-date">${new Date(item.expiry_date).toLocaleDateString()}</span>
+                </li>
+              `).join('')}
+              ${wastedItemsList.length > 10 ? `<li style="text-align:center; color:#666; font-style:italic;">+ ${wastedItemsList.length - 10} more items</li>` : ''}
+            </ul>
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error("Progress data error:", error);
+        alert('Error loading progress data: ' + error.message);
+      }
+    }
+    
+    // ✅ Create Chart
+    function createChart(used, wasted, active) {
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      
+      if (progressChart) {
+        progressChart.destroy();
+      }
+      
+      progressChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Used', 'Wasted', 'Active'],
+          datasets: [{
+            data: [used, wasted, active],
+            backgroundColor: [
+              '#4CAF50',
+              '#F44336',
+              '#1A5A9A'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                font: {
+                  size: 14
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'Food Usage Distribution',
+              font: {
+                size: 16,
+                weight: 'bold'
+              },
+              color: '#333'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return `${label}: ${value} items (${percentage}%)`;
+                }
+              }
+            }
+          },
+          cutout: '60%'
+        }
+      });
+    }
+
+    // ✅ Home page jaisa login check for navigation
+    async function checkLogin(redirectUrl = null) {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        const userConfirmed = confirm("You need to login first. Go to login page?");
+        if (userConfirmed) {
+          window.location.href = 'login.html';
+        }
+        return false;
+      }
+      
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }
+      return true;
+    }
+
+    // ✅ Also update when auth state changes
+    supabaseMain.auth.onAuthStateChange((event, session) => {
+      setupTopBar();
+    });
+
+    // ✅ Add CSS for buttons
+    const style = document.createElement('style');
+    style.textContent = `
+      .btn-used {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+      }
+      
+      .btn-used:hover {
+        background: #3d8b40;
+      }
+      
+      .no-items {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin: 10px;
+        font-style: italic;
+      }
+      
+      .category {
+        color: #666;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+      
+      .expiry {
+        color: #333;
+        font-weight: 600;
+        margin: 5px 0;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    console.log("=== GROCERY PAGE READY ===");
+  </script>
+</body>
+</html>

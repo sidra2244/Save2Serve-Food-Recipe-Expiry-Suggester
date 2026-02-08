@@ -1,0 +1,48 @@
+<!-- theme.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Settings</title>
+  <script src="cookie.js"></script>
+  <style>
+    body {
+      transition: background 0.3s, color 0.3s;
+    }
+    .light-mode { background: #ffffff; color: #333; }
+    .dark-mode { background: #1a1a1a; color: #fff; }
+  </style>
+</head>
+<body id="themeBody">
+  <h2>Theme Settings</h2>
+  
+  <button onclick="setTheme('light')">🌞 Light Mode</button>
+  <button onclick="setTheme('dark')">🌙 Dark Mode</button>
+  <button onclick="setTheme('auto')">⚡ Auto</button>
+  
+  <script>
+    // Page load pe theme apply karein
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = CookieManager.getCookie('theme') || 'light';
+      applyTheme(savedTheme);
+    });
+
+    function setTheme(theme) {
+      CookieManager.setCookie('theme', theme, 30); // 30 days ke liye save
+      applyTheme(theme);
+      alert(`Theme set to: ${theme}`);
+    }
+
+    function applyTheme(theme) {
+      const body = document.getElementById('themeBody');
+      
+      if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.className = 'dark-mode';
+      } else {
+        body.className = 'light-mode';
+      }
+    }
+  </script>
+</body>
+</html>

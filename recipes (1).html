@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipes | Save2Serve</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase initialization
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseRecipes = window.supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+  <!-- Cookie Management System -->
+<script src="cookie.js"></script>
+  <!-- Inline CSS for Recipe Cards -->
+  <style>
+    /* 🔵 Recipe Cards Enhanced Styling */
+    .recipe-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+      cursor: default;
+    }
+    
+    .recipe-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .recipe-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #FF9000, #FFD54F);
+    }
+    
+    .recipe-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .recipe-header h3 {
+      margin: 0;
+      flex: 1;
+      font-size: 22px;
+      color: #1A5A9A;
+      font-weight: 700;
+    }
+    
+    .youtube-link {
+      color: #FF0000;
+      font-size: 22px;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+      background: rgba(255, 0, 0, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    
+    .youtube-link:hover {
+      color: white;
+      background: #FF0000;
+      transform: scale(1.1);
+    }
+    
+    .recipe-ingredients {
+      color: #666;
+      line-height: 1.6;
+      font-size: 15px;
+      margin-bottom: 15px;
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #1A5A9A;
+    }
+    
+    .recipe-ingredients strong {
+      color: #1A5A9A;
+    }
+    
+    /* 🔵 RECIPE META - ONLY INGREDIENTS COUNT (NO DATE) */
+    .recipe-meta {
+      display: flex;
+      justify-content: flex-end; /* ✅ Sirf right side pe ingredients count */
+      margin-top: 15px;
+      font-size: 14px;
+      color: #777;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+    
+    .recipe-meta i {
+      margin-right: 5px;
+      color: #FF9000;
+    }
+    
+    mark {
+      background: #FF9000 !important;
+      color: white !important;
+      padding: 3px 7px !important;
+      border-radius: 4px !important;
+      font-weight: 600 !important;
+    }
+    
+    /* 🔵 Loading Spinner Styling */
+    .loading-spinner {
+      text-align: center;
+      padding: 50px;
+      color: #1A5A9A;
+      font-size: 18px;
+      grid-column: 1 / -1;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .loading-spinner i {
+      margin-right: 10px;
+      font-size: 28px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* 🔵 No Recipes Message */
+    .no-recipes {
+      text-align: center;
+      padding: 50px;
+      color: #666;
+      grid-column: 1 / -1;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .no-recipes i {
+      font-size: 60px;
+      margin-bottom: 20px;
+      color: #1A5A9A;
+      opacity: 0.5;
+    }
+    
+    /* 🔵 Auto Search Message Styling */
+    #autoSearchMessage {
+      background: linear-gradient(135deg, rgba(255, 144, 0, 0.1), rgba(255, 179, 71, 0.1));
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      border: 2px solid rgba(255, 144, 0, 0.3);
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    #autoSearchMessage i {
+      color: #FF9000;
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    #searchingFor {
+      color: #1A5A9A;
+      font-weight: 600;
+    }
+    
+    /* 🔵 Search Section Styling */
+    .search-section {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px 20px;
+      margin: 30px auto;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      max-width: 800px;
+    }
+    
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .search-box input {
+      flex: 1;
+      padding: 18px 25px;
+      border: 2px solid #e1e1e1;
+      border-radius: 25px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: #1A5A9A;
+      box-shadow: 0 0 0 3px rgba(26, 90, 154, 0.1);
+    }
+    
+    .search-box button {
+      background: linear-gradient(135deg, #1A5A9A, #2E7DBA);
+      color: white;
+      border: none;
+      padding: 18px 30px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 120px;
+    }
+    
+    .search-box button:hover {
+      background: linear-gradient(135deg, #2E7DBA, #1A5A9A);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(26, 90, 154, 0.3);
+    }
+    
+    .search-hint {
+      color: #777;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+
+  <!-- 🔹 Top Bar -->
+  <div class="top-bar" id="topBar">
+    <!-- JavaScript se update hoga -->
+  </div>
+
+  <!-- 🔹 Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+        <div class="logo-text">
+          <h1>Save2Serve</h1>
+          <p>Because freshness deserves care</p>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="recipes.html" class="active">Recipes</a>
+        <a href="grocery.html">Grocery</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 🔹 Hero Section -->
+  <section class="page-hero recipes-hero">
+    <div class="overlay"></div>
+    <div class="page-hero-content">
+      <h2>Find Recipes</h2>
+      <p>Search recipes by ingredients you have</p>
+      <div id="autoSearchMessage" style="display: none;">
+        <i class="fas fa-search"></i> 
+        <span id="searchingFor">Searching for recipes...</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Search Section -->
+  <section class="search-section">
+    <div class="container">
+      <div class="search-container">
+        <div class="search-box">
+          <input type="text" id="ingredientSearch" placeholder="Enter ingredients (e.g., tomato, chicken, rice)">
+          <button id="searchBtn">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+        <p class="search-hint">Separate multiple ingredients with commas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Recipes Section -->
+  <section class="recipes-section">
+    <div class="container">
+      <div class="recipes-stats">
+        <p id="recipesCount">Loading recipes...</p>
+      </div>
+
+      <div class="recipes-grid" id="recipesGrid">
+        <!-- Recipes Supabase se load honge -->
+        <div class="loading-spinner" id="loadingSpinner">
+          <i class="fas fa-spinner fa-spin"></i> Loading recipes...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Footer -->
+  <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <script>
+    // ==================== COOKIE FUNCTIONS ====================
+    
+    // Show cookie popup
+    function showCookiePopup() {
+      const choice = localStorage.getItem('cookieChoice');
+      
+      if (!choice) {
+        setTimeout(() => {
+          document.getElementById('cookiePopup').style.display = 'block';
+        }, 1000);
+      } else {
+        updateCookieStatus(choice);
+      }
+    }
+    
+    // Accept all cookies
+    function acceptAllCookies() {
+      localStorage.setItem('cookieChoice', 'accepted');
+      hideCookiePopup();
+      updateCookieStatus('accepted');
+      showMessage('All cookies accepted');
+    }
+    
+    // Accept necessary cookies only
+    function acceptNecessaryCookies() {
+      localStorage.setItem('cookieChoice', 'necessary');
+      hideCookiePopup();
+      updateCookieStatus('necessary');
+      showMessage('Necessary cookies selected');
+    }
+    
+    // Hide cookie popup
+    function hideCookiePopup() {
+      document.getElementById('cookiePopup').style.display = 'none';
+    }
+    
+    // Update cookie status in footer
+    function updateCookieStatus(status) {
+      const statusElement = document.getElementById('cookieStatus');
+      
+      if (status === 'accepted') {
+        statusElement.textContent = 'Accepted';
+        statusElement.style.color = '#4CAF50';
+      } else if (status === 'necessary') {
+        statusElement.textContent = 'Necessary Only';
+        statusElement.style.color = '#FF9000';
+      } else {
+        statusElement.textContent = 'Not selected';
+        statusElement.style.color = '#666';
+      }
+    }
+    
+    // Show temporary message
+    function showMessage(message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: fadeInOut 3s ease;
+      `;
+      messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+    
+    // Add animation for message
+    const messageStyle = document.createElement('style');
+    messageStyle.textContent = `
+      @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(-10px); }
+        15% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
+    `;
+    document.head.appendChild(messageStyle);
+    
+    // ==================== RECIPE FUNCTIONS ====================
+    
+    // DOM Elements
+    let ingredientSearch, searchBtn, recipesGrid, recipesCount, loadingSpinner;
+    let allRecipes = [];
+
+    // Check URL for auto-search
+    function checkURLForIngredient() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const ingredient = urlParams.get('ingredient');
+      
+      if (ingredient) {
+        const decodedIngredient = decodeURIComponent(ingredient).toLowerCase().trim();
+        
+        const messageDiv = document.getElementById('autoSearchMessage');
+        const searchingFor = document.getElementById('searchingFor');
+        
+        messageDiv.style.display = 'block';
+        searchingFor.textContent = `Searching for recipes with: ${decodedIngredient}`;
+        
+        ingredientSearch.value = decodedIngredient;
+        
+        setTimeout(() => {
+          searchRecipes();
+          
+          setTimeout(() => {
+            document.querySelector('.recipes-section').scrollIntoView({ 
+              behavior: 'smooth' 
+            });
+          }, 300);
+          
+        }, 1000);
+      }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+      initializeElements();
+      await setupTopBar();
+      showCookiePopup();
+      await checkAuth();
+      await loadRecipesFromSupabase();
+      setupEventListeners();
+      
+      checkURLForIngredient();
+    });
+
+    // Initialize DOM elements
+    function initializeElements() {
+      ingredientSearch = document.getElementById('ingredientSearch');
+      searchBtn = document.getElementById('searchBtn');
+      recipesGrid = document.getElementById('recipesGrid');
+      recipesCount = document.getElementById('recipesCount');
+      loadingSpinner = document.getElementById('loadingSpinner');
+    }
+
+    // Check authentication
+    async function checkAuth() {
+      const { data: { session } } = await supabaseRecipes.auth.getSession();
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      searchBtn.addEventListener('click', searchRecipes);
+      ingredientSearch.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          searchRecipes();
+        }
+      });
+    }
+
+    // Load recipes from Supabase
+    async function loadRecipesFromSupabase() {
+      try {
+        loadingSpinner.style.display = 'block';
+        
+        const { data: recipesData, error: recipesError } = await supabaseRecipes
+          .from('recipes')
+          .select('id, name, video_link');
+        
+        if (recipesError) throw recipesError;
+        
+        const { data: ingredientsData, error: ingredientsError } = await supabaseRecipes
+          .from('recipe_ingredients')
+          .select('recipe_id, ingredient');
+        
+        if (ingredientsError) throw ingredientsError;
+        
+        allRecipes = recipesData.map(recipe => {
+          const recipeIngredients = ingredientsData
+            .filter(item => item.recipe_id === recipe.id)
+            .map(item => item.ingredient.toLowerCase());
+          
+          return {
+            id: recipe.id,
+            name: recipe.name,
+            ingredients: recipeIngredients,
+            video_link: recipe.video_link
+          };
+        });
+        
+        renderRecipes(allRecipes);
+        loadingSpinner.style.display = 'none';
+        
+        recipesCount.innerHTML = `Found <span>${allRecipes.length}</span> recipes`;
+        
+      } catch (error) {
+        console.error('Error loading recipes:', error);
+        recipesGrid.innerHTML = `
+          <div class="no-recipes">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error Loading Recipes</h3>
+            <p>Could not load recipes from database. Please try again later.</p>
+          </div>
+        `;
+        loadingSpinner.style.display = 'none';
+      }
+    }
+
+    // ✅ RENDER RECIPES - INGREDIENTS AND COUNT ONLY (NO DATE)
+    function renderRecipes(recipes) {
+      if (recipes.length === 0) {
+        recipesGrid.innerHTML = `
+          <div class="no-recipes">
+            <i class="fas fa-utensils"></i>
+            <h3>No Recipes Found</h3>
+            <p>Try different search terms or check back later.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      recipesGrid.innerHTML = '';
+      
+      recipes.forEach(recipe => {
+        const recipeCard = document.createElement('div');
+        recipeCard.className = 'recipe-card';
+        recipeCard.setAttribute('data-ingredients', recipe.ingredients.join(','));
+        
+        // YouTube icon if video link exists
+        let youtubeIcon = '';
+        if (recipe.video_link) {
+          youtubeIcon = `
+            <a href="${recipe.video_link}" 
+               target="_blank" 
+               class="youtube-link" 
+               title="Watch on YouTube"
+               onclick="event.stopPropagation();">
+              <i class="fab fa-youtube"></i>
+            </a>
+          `;
+        }
+        
+        // ✅ SHOW: Ingredients list and ingredients count ONLY
+        recipeCard.innerHTML = `
+          <div class="recipe-content">
+            <div class="recipe-header">
+              <h3>${recipe.name}</h3>
+              ${youtubeIcon}
+            </div>
+            <div class="recipe-ingredients">
+              <strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}
+            </div>
+            <div class="recipe-meta">
+              <span><i class="fas fa-list"></i> ${recipe.ingredients.length} ingredients</span>
+            </div>
+          </div>
+        `;
+        
+        recipesGrid.appendChild(recipeCard);
+      });
+    }
+
+    // Search functionality
+    function searchRecipes() {
+      const searchText = ingredientSearch.value.toLowerCase().trim();
+      
+      if (!searchText) {
+        renderRecipes(allRecipes);
+        recipesCount.innerHTML = `Found <span>${allRecipes.length}</span> recipes`;
+        return;
+      }
+
+      const searchIngredients = searchText.split(',')
+        .map(ing => ing.trim())
+        .filter(ing => ing.length > 0);
+      
+      let foundRecipes = [];
+      
+      if (searchIngredients.length > 0) {
+        foundRecipes = allRecipes.filter(recipe => {
+          return searchIngredients.some(searchIng => {
+            return recipe.ingredients.some(recipeIng => {
+              return recipeIng.includes(searchIng) || 
+                     recipeIng === searchIng ||
+                     recipeIng.split(' ').some(word => word === searchIng);
+            });
+          });
+        });
+        
+        setTimeout(() => {
+          highlightSearchedIngredients(searchIngredients);
+        }, 100);
+      }
+      
+      renderRecipes(foundRecipes);
+      recipesCount.innerHTML = `Found <span>${foundRecipes.length}</span> recipes`;
+      
+      document.getElementById('autoSearchMessage').style.display = 'none';
+    }
+
+    // Highlight searched ingredients
+    function highlightSearchedIngredients(searchIngredients) {
+      const recipeCards = document.querySelectorAll('.recipe-card');
+      
+      recipeCards.forEach(card => {
+        const ingredientsElement = card.querySelector('.recipe-ingredients');
+        if (ingredientsElement) {
+          let text = ingredientsElement.innerHTML;
+          
+          searchIngredients.forEach(ingredient => {
+            if (ingredient.trim()) {
+              const regex = new RegExp(`(${ingredient})`, 'gi');
+              text = text.replace(regex, '<mark>$1</mark>');
+            }
+          });
+          
+          ingredientsElement.innerHTML = text;
+        }
+      });
+    }
+
+    // Setup top bar
+    async function setupTopBar() {
+      const topBar = document.getElementById('topBar');
+      
+      const { data: { session } } = await supabaseRecipes.auth.getSession();
+      const isUserLoggedIn = !!session;
+      
+      if (isUserLoggedIn) {
+        const { data: { user } } = await supabaseRecipes.auth.getUser();
+        const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+        
+        topBar.innerHTML = `
+          <div class="auth-links">
+            <div class="logged-in-user">
+              <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF9000&color=fff" 
+                     alt="User" class="user-avatar" id="topAvatar">
+                <span class="user-name">${userName}</span>
+                <div class="dropdown-menu">
+                  <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                  <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                  <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.querySelector('.logout-btn').addEventListener('click', async function(e) {
+          e.preventDefault();
+          await supabaseRecipes.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'index.html';
+        });
+        
+      } else {
+        topBar.innerHTML = `
+          <div class="auth-links">
+            <div class="guest-user">
+              <a href="login.html">Login</a> | <a href="signup.html">Register</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // Also update when auth state changes
+    supabaseRecipes.auth.onAuthStateChange((event, session) => {
+      setupTopBar();
+    });
+  </script>
+</body>
+</html>

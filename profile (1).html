@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | Save2Serve</title>
+  <!-- CSS Files -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Cookie Management System -->
+<script src="cookie.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1A5A9A 0%, #0d3a6d 100%);
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* Header with back button */
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+    }
+
+    .logo-text h1 {
+      color: #1A5A9A;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: #777;
+      font-style: italic;
+    }
+
+    /* Back Button - Modern style */
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FF9000;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(255, 144, 0, 0.3);
+    }
+
+    .back-button:hover {
+      background: #e68200;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 144, 0, 0.4);
+    }
+
+    .back-button i {
+      font-size: 16px;
+    }
+
+    /* Profile Section */
+    .profile-section {
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 100px);
+    }
+
+    .profile-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative accent */
+    .profile-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #FF9000, #FFD54F);
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .profile-header h2 {
+      color: #1A5A9A;
+      font-size: 32px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .profile-header p {
+      color: #666;
+      font-size: 16px;
+    }
+
+    /* Profile Content */
+    .profile-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .profile-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+
+    /* Avatar Section */
+    .profile-avatar {
+      text-align: center;
+    }
+
+    .avatar-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .profile-avatar img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 4px solid #FF9000;
+      object-fit: cover;
+      background: linear-gradient(135deg, #1A5A9A, #0d3a6d);
+    }
+
+    .avatar-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #FF9000;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Profile Details */
+    .profile-details h3 {
+      color: #1A5A9A;
+      margin-bottom: 25px;
+      font-size: 22px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+      font-weight: 600;
+    }
+
+    .info-item {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border-left: 4px solid #1A5A9A;
+      transition: transform 0.3s ease;
+    }
+
+    .info-item:hover {
+      transform: translateX(5px);
+      background: #f0f7ff;
+    }
+
+    .info-item label {
+      display: block;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+      color: #333;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    /* Loading state */
+    .loading {
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Stats Cards */
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f0f7ff, #e6f2ff);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #d1e3ff;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1A5A9A;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: 40px;
+      backdrop-filter: blur(10px);
+    }
+
+    footer i {
+      color: #FF9000;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .logo-section {
+        justify-content: center;
+      }
+      
+      .profile-container {
+        padding: 25px 20px;
+        margin: 20px;
+      }
+      
+      .profile-avatar img {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .info-item {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-section {
+        padding: 20px 15px;
+      }
+      
+      .profile-header h2 {
+        font-size: 28px;
+      }
+      
+      .back-button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-section">
+      <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+      <div class="logo-text">
+        <h1>Save2Serve</h1>
+        <p>Because freshness deserves care</p>
+      </div>
+    </div>
+    
+    <!-- Back Button -->
+    <a href="index.html" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Back to Home
+    </a>
+  </header>
+
+  <!-- Profile Section -->
+  <section class="profile-section">
+    <div class="profile-container">
+      <div class="profile-header">
+        <h2>My Profile</h2>
+        <p>View your account information</p>
+      </div>
+      
+      <div class="profile-content">
+        <div class="profile-avatar">
+          <div class="avatar-container">
+            <img src="https://ui-avatars.com/api/?name=User&size=150&background=1A5A9A&color=fff&bold=true" 
+                 alt="User Avatar" id="profileAvatar">
+            <div class="avatar-badge">
+              <i class="fas fa-user-check"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-details">
+          <h3>Personal Information</h3>
+          
+          <div class="info-item">
+            <label>Full Name</label>
+            <p id="profileName" class="loading">Loading...</p>
+          </div>
+          
+          <div class="info-item">
+            <label>Email Address</label>
+            <p id="profileEmail" class="loading">Loading...</p>
+          </div>
+          
+          <div class="info-item">
+            <label>Member Since</label>
+            <p id="memberSince" class="loading">Loading...</p>
+          </div>
+          
+          <div class="info-item">
+            <label>User ID</label>
+            <p id="userId" class="loading">Loading...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Optional Stats Section -->
+      <div class="profile-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="itemsCount">0</div>
+          <div class="stat-label">Items Tracked</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-value" id="daysActive">1</div>
+          <div class="stat-label">Days Active</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase initialization
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseProfile = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // DOM Elements
+    let profileAvatar, profileName, profileEmail, memberSince, userId;
+    let itemsCount, recipesCount, daysActive;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeElements();
+      loadUserProfile();
+    });
+
+    // Initialize DOM elements
+    function initializeElements() {
+      profileAvatar = document.getElementById('profileAvatar');
+      profileName = document.getElementById('profileName');
+      profileEmail = document.getElementById('profileEmail');
+      memberSince = document.getElementById('memberSince');
+      userId = document.getElementById('userId');
+      itemsCount = document.getElementById('itemsCount');
+      recipesCount = document.getElementById('recipesCount');
+      daysActive = document.getElementById('daysActive');
+    }
+
+    // Load user profile
+    async function loadUserProfile() {
+      try {
+        // Check if user is logged in
+        const { data: { session } } = await supabaseProfile.auth.getSession();
+        
+        if (!session) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        // Get user from auth
+        const { data: { user } } = await supabaseProfile.auth.getUser();
+        
+        if (user) {
+          // Update user info
+          const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
+          
+          // Update text fields
+          updateTextFields(user, displayName);
+          
+          // Update avatar - ALWAYS BLUE (#1A5A9A)
+          updateAvatar(displayName, user.id);
+          
+          // Fetch user stats
+          await fetchUserStats(user.id);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        showError('Failed to load profile');
+      }
+    }
+
+    // Update text fields
+    function updateTextFields(user, displayName) {
+      profileName.textContent = displayName;
+      profileName.classList.remove('loading');
+      
+      profileEmail.textContent = user.email || 'Not available';
+      profileEmail.classList.remove('loading');
+      
+      userId.textContent = user.id.substring(0, 8) + '...';
+      userId.classList.remove('loading');
+      
+      if (user.created_at) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        memberSince.textContent = new Date(user.created_at).toLocaleDateString('en-US', options);
+        
+        // Calculate days active
+        const createdDate = new Date(user.created_at);
+        const today = new Date();
+        const diffTime = Math.abs(today - createdDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        daysActive.textContent = diffDays;
+      } else {
+        memberSince.textContent = 'Recently joined';
+      }
+      memberSince.classList.remove('loading');
+    }
+
+    // Update avatar - ALWAYS BLUE BACKGROUND
+    function updateAvatar(displayName, userId) {
+      const savedAvatar = localStorage.getItem(`avatar_${userId}`);
+      
+      if (savedAvatar) {
+        profileAvatar.src = savedAvatar;
+      } else {
+        // ALWAYS USE BLUE BACKGROUND (#1A5A9A)
+        profileAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&size=150&background=1A5A9A&color=fff&bold=true`;
+      }
+    }
+
+    // Fetch user statistics
+    async function fetchUserStats(userId) {
+      try {
+        // Count grocery items
+        const { count: items } = await supabaseProfile
+          .from('grocery_items')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId);
+        
+        itemsCount.textContent = items || 0;
+        
+        // Count recipes (you need to implement this based on your schema)
+        // For now, showing 0 as placeholder
+        recipesCount.textContent = 0;
+        
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      profileName.textContent = message;
+      profileName.style.color = '#F44336';
+      profileEmail.textContent = '—';
+      memberSince.textContent = '—';
+      userId.textContent = '—';
+    }
+  </script>
+</body>
+</html>

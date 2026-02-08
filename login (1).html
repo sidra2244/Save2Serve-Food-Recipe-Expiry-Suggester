@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Save2Serve</title>
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Cookie Management System -->
+<script src="cookie.js"></script>
+</head>
+<body>
+  <div class="auth-container">
+    
+    <!-- Left side image -->
+    <div class="side-image">
+      <img src="images/hii.png" alt="Food Illustration">
+    </div>
+
+    <!-- Right side form -->
+    <div class="form-box">
+      <h2>Welcome Back!</h2>
+      <p>Login to continue.</p>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit" class="btn">Login</button>
+        <p class="switch">Don't have an account? <a href="signup.html">Sign Up</a></p>
+      </form>
+      <div id="message" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- Supabase Script -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // IMPORTANT: variable name CHANGE karein
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    // Yeh LINE 35 hai - iska naam change karein
+    const supabaseLoginClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const messageDiv = document.getElementById('message');
+      //Cookie
+      // Login successful:
+document.cookie = "user_logged_in=true; max-age=2592000; path=/";
+// 2592000 seconds = 30 days
+
+document.cookie = "user_logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+
+      // Clear previous messages
+      messageDiv.innerHTML = '';
+      messageDiv.style.color = '';
+      
+      try {
+        // Yahan bhi same variable name use karein
+        const { data, error } = await supabaseLoginClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Success message
+        messageDiv.innerHTML = '<p style="color: green;">Login successful! Redirecting...</p>';
+        
+        // Save user info to localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', data.user.user_metadata?.full_name || email.split('@')[0]);
+        localStorage.setItem('userId', data.user.id);
+        
+        // Redirect after 1 second
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+        
+      } catch (error) {
+        // Show error message
+        messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        console.error('Login error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

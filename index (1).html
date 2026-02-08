@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Save2Serve | Food Saver & Recipe Suggestor</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase Script for Authentication -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase initialization
+    const supabaseUrl = 'https://rhjjzqbgtkptgxyyspll.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoamp6cWJndGtwdGd4eXlzcGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMzM1NzgsImV4cCI6MjA4MTYwOTU3OH0.5DCf9Z0t9KofpC-8_Coxs6n_45gjlrJRV_RaC0fj9bc';
+    
+    const supabaseMain = window.supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+  
+  <!-- Inline CSS for Cookie Popup -->
+  <style>
+    /* 🔵 Cookie Popup Styling */
+    .cookie-popup {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      color: #333;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 9999;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      animation: slideUp 0.5s ease;
+      border: 2px solid #FF9000;
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .cookie-content h4 {
+      color: #1A5A9A;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .cookie-content p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .cookie-btn {
+      padding: 10px 25px;
+      border-radius: 25px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .cookie-btn.accept {
+      background: linear-gradient(135deg, #FF9000, #FFB347);
+      color: white;
+    }
+
+    .cookie-btn.necessary {
+      background: #f0f0f0;
+      color: #666;
+      border: 2px solid #ddd;
+    }
+
+    .cookie-btn.reject {
+      background: #f8f8f8;
+      color: #666;
+      border: 2px solid #ddd;
+    }
+
+    .cookie-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* 🔵 Get Started Button Styling */
+    .btn-get-started {
+      background: linear-gradient(135deg, #FF9000, #FFB347);
+      color: white;
+      border: none;
+      padding: 18px 50px;
+      border-radius: 35px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 40px;
+      box-shadow: 0 8px 25px rgba(255, 144, 0, 0.4);
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .btn-get-started:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #FFB347, #FF9000);
+      transition: all 0.5s ease;
+      z-index: -1;
+    }
+    
+    .btn-get-started:hover:before {
+      left: 0;
+    }
+    
+    .btn-get-started:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(255, 144, 0, 0.5);
+    }
+    
+    .btn-get-started:active {
+      transform: translateY(-2px);
+    }
+    
+    .btn-get-started i {
+      margin-right: 12px;
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+    
+    .btn-get-started:hover i {
+      transform: translateX(5px);
+    }
+    
+    /* 🔵 Hero Content Centering */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      padding: 0 20px;
+      text-align: center;
+    }
+    
+    /* 🔵 Tagline Spacing */
+    .tagline {
+      margin-top: 20px;
+      font-size: 18px;
+      opacity: 0.95;
+      line-height: 1.6;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Cookie Popup -->
+  <div id="cookiePopup" class="cookie-popup" style="display: none;">
+    <div class="cookie-content">
+      <h4><i class="fas fa-cookie-bite"></i> Cookies Notice</h4>
+      <p>We use cookies to make Save2Serve work better for you.</p>
+      
+      <div class="cookie-buttons">
+        <button onclick="handleCookieConsent('all')" class="cookie-btn accept">
+          <i class="fas fa-check"></i> Accept All
+        </button>
+        <button onclick="handleCookieConsent('necessary')" class="cookie-btn necessary">
+          <i class="fas fa-cog"></i> Necessary Only
+        </button>
+        <button onclick="handleCookieConsent('reject')" class="cookie-btn reject">
+          <i class="fas fa-times"></i> Reject Non-Essential
+        </button>
+      </div>
+      
+      <p style="font-size: 12px; color: #666; margin-top: 15px;">
+        <a href="cookie-policy.html" style="color: #1A5A9A;">
+          <i class="fas fa-info-circle"></i> Learn more
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- 🔹 Top Bar -->
+  <div class="top-bar" id="topBar"></div>
+
+  <!-- 🔹 Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <img src="images/logo.png" alt="Save2Serve Logo" class="logo">
+        <div class="logo-text">
+          <h1>Save2Serve</h1>
+          <p>Because freshness deserves care</p>
+        </div>
+      </div>
+      <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="recipes.html" onclick="return checkLogin('recipes.html')">Recipes</a>
+        <a href="grocery.html" onclick="return checkLogin('grocery.html')">Grocery</a>
+        <a href="about.html" onclick="return checkLogin('about.html')">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 🔹 Hero Section -->
+  <section class="hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h2>Never Waste Food Again</h2>
+      <p class="tagline">Track your groceries' expiry dates and get recipe suggestions to use them before they go bad.</p>
+      
+      <!-- 🔵 Get Started Button -->
+      <a href="#" onclick="checkLoginForAction('grocery.html')" class="btn-get-started">
+        <i class="fas fa-rocket"></i> Get Started
+      </a>
+    </div>
+  </section>
+
+  <!-- 🔹 Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2>How Save2Serve Works</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h3>Track Your Items</h3>
+          <p>Add your groceries with expiry dates to keep track of what needs to be used soon.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h3>Get Recipe Ideas</h3>
+          <p>Receive personalized recipe suggestions based on items nearing expiration.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Save Money</h3>
+          <p>Reduce food waste and save money by using ingredients before they expire.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🔹 Footer -->
+  <footer>
+    <p>© 2025 Save2Serve | Made with <i class="fas fa-heart"></i> by Sidra</p>
+  </footer>
+
+  <script>
+    // ==================== COOKIE MANAGEMENT ====================
+    
+    // Simple cookie check - cookie.js se independent
+    function checkCookieConsent() {
+      // Check if cookie consent already given
+      const match = document.cookie.match(/(^| )cookie_consent=([^;]+)/);
+      if (match) {
+        return match[2]; // Return the consent value
+      }
+      return null; // No consent yet
+    }
+    
+    // Handle cookie consent
+    function handleCookieConsent(level) {
+      // Set cookie for 1 year
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + 1);
+      document.cookie = `cookie_consent=${level}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+      
+      // Hide popup
+      document.getElementById('cookiePopup').style.display = 'none';
+      
+      // Show message
+      showMessage(`Cookie preferences saved!`);
+      
+      console.log('Cookie consent set to:', level);
+    }
+    
+    // Show cookie popup if needed
+    function showCookiePopupIfNeeded() {
+      const consent = checkCookieConsent();
+      
+      // If no consent given yet, show popup after 1 second
+      if (!consent) {
+        setTimeout(() => {
+          document.getElementById('cookiePopup').style.display = 'block';
+        }, 1000);
+      } else {
+        console.log('User already gave cookie consent:', consent);
+      }
+    }
+    
+    // ==================== EXISTING FUNCTIONS ====================
+    
+    // Function to check if user is logged in
+    async function checkLogin(redirectUrl = null) {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        // User not logged in
+        const userConfirmed = confirm("You need to login first. Go to login page?");
+        if (userConfirmed) {
+          window.location.href = 'login.html';
+        }
+        return false; // Prevent default navigation
+      }
+      
+      // User is logged in
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }
+      return true;
+    }
+    
+    // Function to check login for "Get Started" button
+    async function checkLoginForAction(redirectUrl) {
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      
+      if (!session) {
+        alert("Please login first to use this feature!");
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // User is logged in, proceed
+      window.location.href = redirectUrl;
+    }
+    
+    // Function to update top bar based on login status
+    async function updateTopBar() {
+      const topBar = document.getElementById('topBar');
+      
+      // Check if user is logged in
+      const { data: { session } } = await supabaseMain.auth.getSession();
+      const isUserLoggedIn = !!session;
+      
+      if (isUserLoggedIn) {
+        // User is logged in - show profile with dropdown
+        const { data: { user } } = await supabaseMain.auth.getUser();
+        const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+        
+        topBar.innerHTML = `
+          <div class="auth-links">
+            <div class="logged-in-user">
+              <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF9000&color=fff" 
+                     alt="User" class="user-avatar" id="topAvatar">
+                <span class="user-name">${userName}</span>
+                <div class="dropdown-menu">
+                  <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                  <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+                  <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Add logout functionality
+        document.querySelector('.logout-btn').addEventListener('click', async function(e) {
+          e.preventDefault();
+          await supabaseMain.auth.signOut();
+          localStorage.clear();
+          window.location.href = 'index.html';
+        });
+        
+      } else {
+        // User is not logged in - show login/register links
+        topBar.innerHTML = `
+          <div class="auth-links">
+            <div class="guest-user">
+              <a href="login.html">Login</a> | <a href="signup.html">Register</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // Show temporary message
+    function showMessage(message) {
+      // Create message element
+      const messageDiv = document.createElement('div');
+      messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: fadeInOut 3s ease;
+      `;
+      messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+      document.body.appendChild(messageDiv);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+    
+    // Check login status and initialize everything
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('=== PAGE LOADING ===');
+      
+      // 1. First show cookie popup if needed (LOGIN STATUS SE PEHLE)
+      showCookiePopupIfNeeded();
+      
+      // 2. Then update top bar
+      await updateTopBar();
+      
+      // 3. Also update when auth state changes
+      supabaseMain.auth.onAuthStateChange((event, session) => {
+        updateTopBar();
+        // Note: Cookie popup will NOT hide when user logs in
+        // It will only hide when user gives consent
+      });
+    });
+  </script>
+
+</body>
+</html>
